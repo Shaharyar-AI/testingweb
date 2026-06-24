@@ -1,6 +1,5 @@
 const express = require('express');
 const path = require('path');
-require('dotenv').config();
 
 const db = require('./db');
 const { startMonitoring } = require('./monitor');
