@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PingBoard — Free Website Uptime Monitor</title>
+  <meta name="description" content="Monitor your websites and APIs in real-time. No sign-up required. Free forever.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #020817; }
+    .gradient-text {
+      background: linear-gradient(135deg, #fff 0%, #34d399 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .grid-bg {
+      background-image:
+        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+    .glow {
+      box-shadow: 0 0 60px 20px rgba(16, 185, 129, 0.08);
+    }
+    .card-hover { transition: border-color 0.2s, transform 0.2s; }
+    .card-hover:hover { border-color: rgba(255,255,255,0.1); transform: translateY(-2px); }
+  </style>
+</head>
+<body class="text-white antialiased min-h-screen">
+
+  <!-- Grid background -->
+  <div class="fixed inset-0 grid-bg pointer-events-none opacity-60"></div>
+  <!-- Radial glow -->
+  <div class="fixed top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-emerald-500/5 rounded-full blur-3xl pointer-events-none"></div>
+
+  <!-- Nav -->
+  <nav class="relative z-10 border-b border-white/5">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center shadow-lg shadow-emerald-500/30">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+        </div>
+        <span class="font-bold text-lg tracking-tight">PingBoard</span>
+      </div>
+      <div class="flex items-center gap-2 text-sm text-slate-500">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse inline-block"></span>
+        Monitors running now
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="relative z-10 max-w-4xl mx-auto px-6 pt-28 pb-20 text-center">
+    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-widest mb-8">
+      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block"></span>
+      Zero setup · No account needed
+    </div>
+
+    <h1 class="text-5xl md:text-7xl font-black leading-[1.05] mb-6 tracking-tight">
+      Know when your sites<br>go down
+      <span class="gradient-text"> instantly</span>
+    </h1>
+
+    <p class="text-lg md:text-xl text-slate-400 mb-12 max-w-xl mx-auto leading-relaxed">
+      Create a free monitoring dashboard in seconds. Track uptime, response times, and 24-hour history. Share with your team — no login required.
+    </p>
+
+    <!-- Create Dashboard Form -->
+    <div class="max-w-sm mx-auto glow">
+      <form action="/dashboards" method="POST" class="flex flex-col gap-3">
+        <input
+          type="text"
+          name="name"
+          placeholder="My Project Dashboard"
+          required
+          maxlength="100"
+          autocomplete="off"
+          class="w-full px-4 py-3.5 bg-slate-900 border border-slate-700 hover:border-slate-600 focus:border-emerald-500 rounded-xl text-white placeholder-slate-600 outline-none transition-colors text-sm"
+        >
+        <button type="submit" class="w-full py-3.5 bg-emerald-500 hover:bg-emerald-400 active:scale-95 rounded-xl font-bold transition-all duration-150 text-sm shadow-lg shadow-emerald-500/25">
+          Create Free Dashboard →
+        </button>
+      </form>
+      <p class="text-slate-700 text-xs mt-3">Just bookmark the dashboard URL — that's your only "password"</p>
+    </div>
+  </section>
+
+  <!-- Mock dashboard preview -->
+  <section class="relative z-10 max-w-4xl mx-auto px-6 pb-20">
+    <div class="bg-slate-900/80 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+      <!-- Mock header -->
+      <div class="border-b border-slate-800 px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="text-slate-600 text-sm">PingBoard</span>
+          <span class="text-slate-700">/</span>
+          <span class="font-semibold text-sm">My Project</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="text-emerald-400 text-xs font-medium">2 / 2 Operational</span>
+        </div>
+      </div>
+      <!-- Mock monitors -->
+      <div class="p-6 space-y-3">
+        <!-- Monitor 1 -->
+        <div class="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 flex items-center justify-between gap-4">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="relative flex-shrink-0">
+              <div class="w-2.5 h-2.5 rounded-full bg-emerald-400"></div>
+              <div class="absolute inset-0 w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping opacity-50"></div>
+            </div>
+            <div class="min-w-0">
+              <div class="font-semibold text-sm">API Server</div>
+              <div class="text-slate-500 text-xs truncate">https://api.myapp.com</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 flex-shrink-0">
+            <div class="hidden md:flex gap-px">
+              <% for(let i = 0; i < 35; i++) { %>
+              <div class="w-1.5 h-5 rounded-sm <%= i < 3 ? 'bg-slate-700' : 'bg-emerald-400' %> opacity-80"></div>
+              <% } %>
+            </div>
+            <div class="text-right">
+              <div class="text-emerald-400 font-bold text-sm">100%</div>
+              <div class="text-slate-600 text-xs">24h uptime</div>
+            </div>
+            <div class="text-right hidden sm:block">
+              <div class="text-slate-300 font-semibold text-sm">123ms</div>
+              <div class="text-slate-600 text-xs">avg resp</div>
+            </div>
+          </div>
+        </div>
+        <!-- Monitor 2 -->
+        <div class="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 flex items-center justify-between gap-4">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="relative flex-shrink-0">
+              <div class="w-2.5 h-2.5 rounded-full bg-emerald-400"></div>
+              <div class="absolute inset-0 w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping opacity-50"></div>
+            </div>
+            <div class="min-w-0">
+              <div class="font-semibold text-sm">Website</div>
+              <div class="text-slate-500 text-xs truncate">https://myapp.com</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 flex-shrink-0">
+            <div class="hidden md:flex gap-px">
+              <% for(let i = 0; i < 35; i++) { %>
+              <div class="w-1.5 h-5 rounded-sm <%= (i === 12 || i === 13) ? 'bg-red-500' : (i < 2 ? 'bg-slate-700' : 'bg-emerald-400') %> opacity-80"></div>
+              <% } %>
+            </div>
+            <div class="text-right">
+              <div class="text-yellow-400 font-bold text-sm">94%</div>
+              <div class="text-slate-600 text-xs">24h uptime</div>
+            </div>
+            <div class="text-right hidden sm:block">
+              <div class="text-slate-300 font-semibold text-sm">87ms</div>
+              <div class="text-slate-600 text-xs">avg resp</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="relative z-10 max-w-5xl mx-auto px-6 pb-24">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+
+      <div class="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 card-hover">
+        <div class="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center mb-4">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
+        <h3 class="font-bold text-base mb-2">Every 60 Seconds</h3>
+        <p class="text-slate-500 text-sm leading-relaxed">Your monitors are pinged every minute — 1,440 checks per day, per service. You'll know within 60 seconds of a problem.</p>
+      </div>
+
+      <div class="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 card-hover">
+        <div class="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center mb-4">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+        </div>
+        <h3 class="font-bold text-base mb-2">Response Time History</h3>
+        <p class="text-slate-500 text-sm leading-relaxed">Visual status bars for the last 24 hours. See exactly when a service went down and how long it stayed down.</p>
+      </div>
+
+      <div class="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 card-hover">
+        <div class="w-10 h-10 bg-purple-500/10 rounded-xl flex items-center justify-center mb-4">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>
+          </svg>
+        </div>
+        <h3 class="font-bold text-base mb-2">Share Instantly</h3>
+        <p class="text-slate-500 text-sm leading-relaxed">Share your dashboard URL with your team. Anyone with the link can view the live status — no accounts needed.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="relative z-10 border-t border-slate-800/50 px-6 py-8">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-slate-700 text-sm">
+      <span class="font-medium">PingBoard — Free uptime monitoring, no strings attached</span>
+      <span>Built with Node.js · PostgreSQL · Tailwind CSS</span>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= dashboard.name %> — PingBoard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #020817; }
+    .grid-bg {
+      background-image:
+        linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+    .status-bar { width: 6px; border-radius: 3px; height: 24px; flex-shrink: 0; }
+    .status-bar:hover { opacity: 0.7; }
+    input:focus { outline: none; }
+  </style>
+</head>
+<body class="text-white antialiased min-h-screen">
+  <div class="fixed inset-0 grid-bg pointer-events-none opacity-40"></div>
+
+  <!-- Nav -->
+  <nav class="relative z-10 border-b border-white/5 sticky top-0 bg-[#020817]/90 backdrop-blur-md">
+    <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-2 min-w-0">
+        <a href="/" class="flex items-center gap-2 flex-shrink-0">
+          <div class="w-7 h-7 bg-emerald-500 rounded-md flex items-center justify-center">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+          </div>
+          <span class="text-slate-500 text-sm font-medium hidden sm:inline">PingBoard</span>
+        </a>
+        <span class="text-slate-700 hidden sm:inline">/</span>
+        <span class="font-semibold text-sm truncate"><%= dashboard.name %></span>
+      </div>
+
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <%
+          var totalMonitors = monitors.length;
+          var upMonitors = monitors.filter(function(m) { return m.lastPing && m.lastPing.is_up; }).length;
+          var downMonitors = monitors.filter(function(m) { return m.lastPing && !m.lastPing.is_up; }).length;
+        %>
+        <% if (totalMonitors > 0) { %>
+        <span class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium <%= downMonitors > 0 ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' %>">
+          <span class="w-1.5 h-1.5 rounded-full <%= downMonitors > 0 ? 'bg-red-400' : 'bg-emerald-400' %> inline-block"></span>
+          <%= downMonitors > 0 ? downMonitors + ' down' : 'All operational' %>
+        </span>
+        <% } %>
+        <button
+          onclick="copyDashboardUrl(this)"
+          class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs font-medium transition-colors"
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
+          </svg>
+          <span>Share</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="relative z-10 max-w-5xl mx-auto px-6 py-8">
+
+    <!-- Stats bar -->
+    <% if (monitors.length > 0) { %>
+    <div class="grid grid-cols-3 gap-4 mb-8">
+      <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-4 text-center">
+        <div class="text-2xl font-black text-white"><%= totalMonitors %></div>
+        <div class="text-slate-500 text-xs mt-0.5">Total Monitors</div>
+      </div>
+      <div class="bg-slate-900/60 border border-emerald-500/20 rounded-xl p-4 text-center">
+        <div class="text-2xl font-black text-emerald-400"><%= upMonitors %></div>
+        <div class="text-slate-500 text-xs mt-0.5">Operational</div>
+      </div>
+      <div class="bg-slate-900/60 border border-<%= downMonitors > 0 ? 'red-500/20' : 'slate-800' %> rounded-xl p-4 text-center">
+        <div class="text-2xl font-black <%= downMonitors > 0 ? 'text-red-400' : 'text-slate-600' %>"><%= downMonitors %></div>
+        <div class="text-slate-500 text-xs mt-0.5">Down</div>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- Add Monitor Form -->
+    <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 mb-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="font-semibold text-sm text-slate-300">Add Monitor</h2>
+        <span class="text-slate-600 text-xs">Pinged every 60 seconds</span>
+      </div>
+      <form action="/dashboard/<%= dashboard.slug %>/monitors" method="POST" class="flex flex-col sm:flex-row gap-2.5">
+        <input
+          type="text"
+          name="name"
+          placeholder="Service name (e.g. API Server)"
+          required
+          maxlength="100"
+          autocomplete="off"
+          class="flex-1 px-4 py-2.5 bg-slate-800 border border-slate-700 hover:border-slate-600 focus:border-emerald-500 rounded-xl text-sm text-white placeholder-slate-600 transition-colors"
+        >
+        <input
+          type="text"
+          name="url"
+          placeholder="https://example.com"
+          required
+          maxlength="500"
+          autocomplete="off"
+          class="flex-1 px-4 py-2.5 bg-slate-800 border border-slate-700 hover:border-slate-600 focus:border-emerald-500 rounded-xl text-sm text-white placeholder-slate-600 transition-colors"
+        >
+        <button type="submit" class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 active:scale-95 rounded-xl text-sm font-semibold transition-all shadow-lg shadow-emerald-500/20 whitespace-nowrap">
+          + Add Monitor
+        </button>
+      </form>
+    </div>
+
+    <!-- Monitors List -->
+    <% if (monitors.length === 0) { %>
+    <div class="text-center py-24 text-slate-600">
+      <div class="mb-4">
+        <svg class="inline-block" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+        </svg>
+      </div>
+      <p class="text-lg font-medium mb-1">No monitors yet</p>
+      <p class="text-sm">Add your first monitor above to start tracking uptime.</p>
+    </div>
+    <% } else { %>
+    <div class="space-y-3">
+      <% monitors.forEach(function(monitor) {
+        var isUp = monitor.lastPing ? monitor.lastPing.is_up : null;
+        var hasData = monitor.lastPing !== null;
+
+        // Build status bars array (45 bars, oldest left → newest right)
+        var rawPings = monitor.recentPings || [];
+        var numBars = 45;
+        var chronoPings = rawPings.slice().reverse(); // oldest first
+        var bars = [];
+        var padding = numBars - chronoPings.length;
+        for (var i = 0; i < Math.max(0, padding); i++) bars.push(null);
+        bars = bars.concat(chronoPings.slice(-numBars));
+      %>
+      <div class="bg-slate-900/60 border <%= isUp === null ? 'border-slate-800' : (isUp ? 'border-slate-800 hover:border-emerald-500/20' : 'border-red-500/30') %> rounded-2xl p-5 transition-all duration-200 group">
+
+        <!-- Top row: status + name + delete -->
+        <div class="flex items-start justify-between gap-4 mb-4">
+          <div class="flex items-center gap-3 min-w-0">
+            <!-- Status dot -->
+            <div class="relative flex-shrink-0 mt-0.5">
+              <div class="w-2.5 h-2.5 rounded-full <%= isUp === null ? 'bg-slate-600' : (isUp ? 'bg-emerald-400' : 'bg-red-400') %>"></div>
+              <% if (isUp === true) { %>
+              <div class="absolute inset-0 w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping opacity-60"></div>
+              <% } %>
+            </div>
+            <div class="min-w-0">
+              <h3 class="font-bold text-base leading-tight truncate"><%= monitor.name %></h3>
+              <a href="<%= monitor.url %>" target="_blank" rel="noopener noreferrer" class="text-slate-500 text-xs hover:text-slate-400 transition-colors truncate block max-w-xs sm:max-w-sm"><%= monitor.url %></a>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-4 flex-shrink-0">
+            <!-- Uptime % -->
+            <div class="text-right">
+              <div class="font-black text-lg leading-tight <%= monitor.uptime === null ? 'text-slate-600' : (monitor.uptime >= 99 ? 'text-emerald-400' : (monitor.uptime >= 95 ? 'text-yellow-400' : 'text-red-400')) %>">
+                <%= monitor.uptime !== null ? monitor.uptime + '%' : '—' %>
+              </div>
+              <div class="text-slate-600 text-xs">24h uptime</div>
+            </div>
+
+            <!-- Avg response -->
+            <div class="text-right hidden sm:block">
+              <div class="font-bold text-base leading-tight text-slate-300">
+                <%= monitor.avgResponseTime ? monitor.avgResponseTime + 'ms' : '—' %>
+              </div>
+              <div class="text-slate-600 text-xs">avg resp</div>
+            </div>
+
+            <!-- Delete -->
+            <form action="/dashboard/<%= dashboard.slug %>/monitors/<%= monitor.id %>/delete" method="POST" class="flex-shrink-0">
+              <button type="submit"
+                onclick="return confirm('Remove \'<%= monitor.name.replace(/'/g, '\\\'') %>\' from monitoring?')"
+                class="p-1.5 text-slate-700 hover:text-red-400 transition-colors rounded-lg hover:bg-red-500/10"
+                title="Remove monitor"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+                </svg>
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Status bars -->
+        <div class="flex items-center gap-px mb-3 overflow-hidden">
+          <% bars.forEach(function(bar, idx) {
+            var color = bar === null ? 'bg-slate-800' : (bar.is_up ? 'bg-emerald-400' : 'bg-red-500');
+            var title = bar === null ? 'No data' : (new Date(bar.checked_at).toLocaleTimeString() + ' — ' + (bar.is_up ? 'UP' + (bar.response_time ? ' (' + bar.response_time + 'ms)' : '') : 'DOWN'));
+          %>
+          <div class="status-bar <%= color %> cursor-default" title="<%= title %>"></div>
+          <% }); %>
+        </div>
+        <div class="flex items-center justify-between text-xs text-slate-700">
+          <span>24h ago</span>
+          <span class="text-slate-600 hidden sm:inline"><%= bars.filter(function(b) { return b !== null; }).length %> checks recorded</span>
+          <span>Now</span>
+        </div>
+
+        <!-- Last check detail -->
+        <% if (hasData) { %>
+        <div class="mt-3 pt-3 border-t border-slate-800 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+          <span class="font-medium <%= isUp ? 'text-emerald-400' : 'text-red-400' %>">
+            <%= isUp ? '✓ Operational' : '✗ Down' %>
+          </span>
+          <% if (monitor.lastPing.status_code) { %>
+          <span class="text-slate-600">HTTP <%= monitor.lastPing.status_code %></span>
+          <% } %>
+          <% if (monitor.lastPing.response_time) { %>
+          <span class="text-slate-600"><%= monitor.lastPing.response_time %>ms</span>
+          <% } %>
+          <% if (!isUp && monitor.lastPing.error_message) { %>
+          <span class="text-red-500/70 font-mono"><%= monitor.lastPing.error_message.substring(0, 60) %></span>
+          <% } %>
+          <span class="text-slate-700 ml-auto">Last checked: <%= new Date(monitor.lastPing.checked_at).toLocaleTimeString() %></span>
+        </div>
+        <% } else { %>
+        <div class="mt-3 pt-3 border-t border-slate-800 text-xs text-slate-600">
+          Waiting for first check — this usually takes up to 60 seconds
+        </div>
+        <% } %>
+      </div>
+      <% }); %>
+    </div>
+    <% } %>
+
+    <!-- Footer -->
+    <div class="mt-8 flex items-center justify-between text-xs text-slate-700 pb-4">
+      <span>Auto-refreshes every 60 seconds</span>
+      <span id="countdown">Next refresh in <span id="timer">60</span>s</span>
+    </div>
+
+  </div>
+
+  <script>
+    function copyDashboardUrl(btn) {
+      navigator.clipboard.writeText(window.location.href).then(function() {
+        var original = btn.innerHTML;
+        btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>Copied!</span>';
+        btn.classList.add('text-emerald-400', 'border-emerald-500/30');
+        setTimeout(function() {
+          btn.innerHTML = original;
+          btn.classList.remove('text-emerald-400', 'border-emerald-500/30');
+        }, 2000);
+      });
+    }
+
+    // Auto-refresh countdown
+    var secs = 60;
+    var timerEl = document.getElementById('timer');
+    var interval = setInterval(function() {
+      secs--;
+      if (timerEl) timerEl.textContent = secs;
+      if (secs <= 0) {
+        clearInterval(interval);
+        location.reload();
+      }
+    }, 1000);
+  </script>
+</body>
+</html>
